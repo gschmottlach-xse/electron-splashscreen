@@ -45,6 +45,15 @@ var closeSplashScreen = function (main, min) {
         }, timeout);
     }
 };
+
+var centerSplashScreen = function(mainWin, splashWin) {
+    var mainPos = mainWin.getPosition();
+    var mainSize = mainWin.getSize();
+    var splashSize = splashWin.getSize();
+    splashWin.setPosition(Math.floor((mainPos[0]+(mainSize[0]/2))-(splashSize[0]/2)),
+                    Math.floor((mainPos[1]+(mainSize[1]/2))-(splashSize[1]/2)));
+}
+
 /**
  * The actual splashscreen browser window.
  * @private
@@ -65,6 +74,7 @@ exports.initSplashScreen = function (config) {
         windowCtor: config.windowCtor,
         templateUrl: config.templateUrl,
         splashScreenOpts: config.splashScreenOpts,
+        splashLayoutFunc: config.splashLayoutFunc || centerSplashScreen
     };
     xConfig.splashScreenOpts.frame = false;
     xConfig.splashScreenOpts.center = true;
@@ -77,6 +87,10 @@ exports.initSplashScreen = function (config) {
         window = new electron.BrowserWindow(xConfig.windowOpts);
     }
     splashScreen = new electron.BrowserWindow(xConfig.splashScreenOpts);
+
+    if ( typeof xConfig.splashLayoutFunc === 'function' ) {
+        xConfig.splashLayoutFunc(window, splashScreen);
+    }
     splashScreen.loadURL("file://" + xConfig.templateUrl);
     // Splashscreen is fully loaded and ready to view.
     splashScreen.webContents.on("did-finish-load", function () {
